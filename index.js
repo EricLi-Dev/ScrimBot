@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 var usersInQueue = [];
 var memNicks = {};
+var chanState = {};
 client.once('ready', () => {
     console.log('Ready!');
 });
@@ -22,10 +23,13 @@ async function purge() {
 
 
 }
-//Client Join Waiting Quese Voice Channel
+//Client Join Waiting Queue Voice Channel
 client.on('voiceStateUpdate', (oldMember, newMember) => {
-    let newUserChannel = newMember.voiceChannel;
-    let oldUserChannel = oldMember.voiceChannel;
+
+
+
+    let newUserChannel = newMember.voiceChannel;//gets the present/new voiceChannel of the Member
+    let oldUserChannel = oldMember.voiceChannel;//gets the previous voiceChannel of the Member
     let name = newMember.displayName;
     var availableSet = [true, true, true, true, true, true];
     var setsArr = [
@@ -42,7 +46,8 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
     // console.log(" ");
     // console.log(String(newUserChannel));
     // console.log(" ");
-
+    if (chanState[newMember] != newUserChannel) {
+      chanState[newMember] = newUserChannel;
     //New User joins
     if (oldUserChannel === undefined || newUserChannel !== undefined) {
         console.log("Runs through 1.....the first if statement");
@@ -102,7 +107,7 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
     }
 
     //Change the length equality to however many people......
-    if (usersInQueue.length >= 10) { //change
+    if (usersInQueue.length >= 6) { //change
         //randomly split the 10 users into two voice chats
         //for loop iterates through the sets of teams to check availability.
         for (var l = 0; l < 10; l++) {
@@ -114,35 +119,76 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
                 //loop through each player of queue
                 var count = 0;
                 var count1 = 0;
-                for (var i = 0; i < 10; i++) //change
+                for (var i = 0; i < 6; i++) //change
                 {
                     const mem = usersInQueue[i];
-                    //var rand = Math.random();
-
+                    var rand = Math.random();
+                    var hostTaken = false;
                     //random selection of team
                     //(rand > 0.5 && count<=2 ) ||
-                    if (count1 >= 5) { //change
+                    if (count1 >= 3) { //change
+                      if (i === 2 || i === 5){//change
+                        mem.setNickname("👑 [Team " + (l+1) + "] " + mem.displayName)
+                        const chan = client.channels.get(team1)
+                        mem.setVoiceChannel(chan)
+                            .then(() => console.log(`Moved ${mem.displayName} to ${chan}`))
+                            .catch(console.error);
+                         memNicks[String(mem)] = mem.displayName;
+                        count++;
+
+                        if ((rand > 0.5 && hostTaken === false) || (i === 5 && hostTaken === false)){
+                          mem.setNickname("🔥👑 [Team " + (l+1) + "] " + mem.displayName);
+                          hostTaken = true;
+                          var text = "  Hey, your job as the Host 🔥 of the lobby is to: \n\n\t\t 1) Add everyone on your team as a friend through their Riot names and Riot IDs. \n\t\t 2) Create a custom match lobby and invite everyone on your team to the lobby. \n\t\t 3) You should have gotten a message from the enemy Team Captain 👑 with their Riot name and Riot ID. Add them to the lobby as well. \n\t\t - That's it!! Now it is up to the Team Captain 👑 on the enemy team to invite his teammates to the lobby. HAVE FUN😀!! " ;
+                          mem.send(text);
+                        } else {
+                          var text = "Hey, your job as a Team Captain 👑 is to: \n\n\t\t 1) Add everyone in your team as a friend through their Riot names and Riot IDs. \n\t\t 2) Message the Host 🔥 of the lobby on the enemy team through discord and send him your Riot name and Riot ID. \n\t\t 3) After the Host 🔥 invites you to the lobby, join and invite the rest of your team. \n\t\t 4) That\'s it!! HAVE FUN 😀!";
+                          mem.send(text);
+                        }
+                      } else {
                         const chan = client.channels.get(team1)
                         mem.setVoiceChannel(chan)
                             .then(() => console.log(`Moved ${mem.displayName} to ${chan}`))
                             .catch(console.error);
                          memNicks[String(mem)] = mem.displayName;
                         mem.setNickname("[Team " + (l+1)+ "] " + mem.displayName);
-                        console.log(mem);
+                        //console.log(mem);
                         console.log("NICKNAME: " + mem.displayName);
                         console.log("CHANGED 1");
                         count++;
+                      }
 
                     } else {
+                      if (i === 2 || i === 5){//change
+                        mem.setNickname("👑 [Team " + (l+1) + "] " + mem.displayName)
                         const chan = client.channels.get(team2)
                         mem.setVoiceChannel(chan)
                             .then(() => console.log(`Moved ${mem.displayName} to ${chan}`))
                             .catch(console.error);
-                         mem.setNickname("[Team " + (l+2)+"] "+mem.displayName);
-                        console.log(mem);
-                        console.log("NICKNAME: " + mem.displayName);
-                        console.log("CHANGED 2");
-                        count1++;
+                              count1++;
+
+                          if ((rand > 0.5 && hostTaken === false) || (i === 5 && hostTaken === false)){
+                            mem.setNickname("🔥👑 [Team " + (l+1) + "] " + mem.displayName);
+                            hostTaken = true;
+                            var text = "  Hey, your job as the Host 🔥 of the lobby is to: \n\n\t\t 1) Add everyone on your team as a friend through their names and Riot IDs. \n\t\t 2) Create a custom match lobby and invite everyone on your team to the lobby. \n\t\t 3) You should have gotten a message from the enemy Team Captain 👑 with their name and Riot ID. Add them to the lobby as well. \n\t\t - That's it!! Now it is up to the Team Captain 👑 on the enemy team to invite his teammates to the lobby. HAVE FUN😀!! " ;
+                            mem.send(text);
+                            }else {
+                              var text = "Hey, your job as a Team Captain 👑 is to: \n\n\t\t 1) Add everyone in your team as a friend through their names and Riot IDs. \n\t\t 2) Message the Host 🔥 of the lobby on the enemy team through discord and send him your name and Riot ID. \n\t\t 3) After the Host 🔥 invites you to the lobby, join and invite the rest of your team. \n\t\t 4) That\'s it!! HAVE FUN 😀!";
+                              mem.send(text);
+
+                            }
+                        } else {
+                          const chan = client.channels.get(team2)
+                          mem.setVoiceChannel(chan)
+                              .then(() => console.log(`Moved ${mem.displayName} to ${chan}`))
+                              .catch(console.error);
+                           mem.setNickname("[Team " + (l+2)+"] "+mem.displayName);
+                          console.log(mem);
+                          console.log("NICKNAME: " + mem.displayName);
+                          console.log("CHANGED 2");
+                          count1++;
+                        }
+
                     }
 
                 }
@@ -172,7 +218,7 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
         purge();
         console.log("Purge did not work");
 
-        usersInQueue.splice(0, 10); //change
+        usersInQueue.splice(0, 6); //change
 
     }
 
@@ -182,20 +228,43 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
     //removes the 10 users from the queue
 
 
-
+}
 
 })
+
+
+
 //Message Commands
 
-
+// client.on('message', message => {
+//   if (message.content == "!w"){
+//     message.channel.send("🔥");
+//   }
+//
+// })
 
 //'180793953652572170' => [Object],
 //      '270047342579679232' => [Object] }
 
 //
-// client.on('message', message => {
-//     console.log(message.content);
+client.on('message', message => {
+  var prefix = "!5man"
+  if (!message.content.startsWith(prefix) || message.author.bot) return;
+
+  const args = message.content.slice(prefix.length).split('');
+  const command = args.shift();
+
+  if (command === "5man"){
+      if (args.length < 5 || args.length > 5) {
+          return message.channel.send("You provided too many, not enough, or no arguments. Correct usage would be: !5man @example @example @example @example @example")
+      }
+      message.channel.send(`Arguments: ${args}`);
+
+  }
+})
+
 //
+// }
 //     var counter = 0;
 //     let ids = [];
 //
@@ -291,4 +360,4 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 //
 // }
 //});
-client.login('NzIwMDU4NDU4Nzk5NDcyNjQw.XuAmcA.DohXvggyPrhQfTmN3tEa5wMkXrk');
+client.login('NzIwMDU4NDU4Nzk5NDcyNjQw.XuFW1w.2CSWbcdwFagMmDKQ5hw1ezkp95Y');
