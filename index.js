@@ -360,4 +360,4 @@ client.on('message', message => {
 //
 // }
 //});
-client.login('NzIwMDU4NDU4Nzk5NDcyNjQw.XuFW1w.2CSWbcdwFagMmDKQ5hw1ezkp95Y');
+client.login('BOT TOKEN');
